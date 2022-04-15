@@ -4,6 +4,8 @@ import searchView from './views/searchView.js';
 import resultsView from './views/resultsView.js';
 import paginationView from './views/paginationView.js';
 import bookmarksView from './views/bookmarksView.js';
+import addRecipeViews from './views/addRecipeViews.js';
+import { MODAL_CLOSE_SEC } from './config.js';
 
 //5️⃣ making sure that old browsers still being suported- npm
 import 'core-js/stable';
@@ -96,8 +98,33 @@ const controlBookmarks = function () {
   bookmarksView.render(model.state.bookmarks);
 };
 
-const newFeature = function () {
-  console.log('Welcome to the app');
+const controlAddRecipe = async function (newRecipe) {
+  try {
+    // Show loading spinner
+    addRecipeViews.renderSpinner();
+
+    await model.uploadRecipe(newRecipe);
+    console.log(model.state.recipe);
+
+    // Render recipe
+    recipeView.render(model.state.recipe);
+
+    // Success message
+    addRecipeViews.renderMessage();
+
+    // Render bookmark view
+    bookmarksView.render(model.state.bookmarks);
+
+    // Change ID in URL
+    window.history.pushState(null, '', `#${model.state.recipe.id}`);
+
+    // Close Form window
+    setTimeout(function () {
+      addRecipeViews.toggleWindow();
+    }, MODAL_CLOSE_SEC * 1000);
+  } catch (err) {
+    addRecipeViews.renderError(err.message);
+  }
 };
 
 // publisher subscriber pattern
@@ -108,7 +135,7 @@ const init = function () {
   recipeView.addHandlerAddBookmark(controlAddBookmark);
   searchView.addHandlerSearch(controlSearchResults);
   paginationView.addHandlerClick(controlPagination);
-  newFeature();
+  addRecipeViews.addHandlerUpload(controlAddRecipe);
 };
 
 init();

@@ -10,10 +10,20 @@ const timeout = function (s) {
   });
 };
 
-export const getJSON = async function (url) {
+export const AJAX = async function (url, uploadData = undefined) {
   try {
+    const fetchPro = uploadData
+      ? fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(uploadData),
+        })
+      : fetch(url);
+
     // Promise.race takes 2 promises, and whoever first reject or fullfils wins
-    const res = await Promise.race([fetch(url), timeout(TIMEOUT_SEC)]);
+    const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
 
     //2. we convert it to json, method available to all response objects
     const data = await res.json();
